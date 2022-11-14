@@ -49,7 +49,7 @@ fun1alt(dat)
 # Test for the first
 microbenchmark::microbenchmark(
   fun1(dat),
-  fun1alt(dat)
+  fun1alt(dat), check = "equivalent"
 )
 ```
 
@@ -75,7 +75,7 @@ fun2(dat)
 
 
 fun2alt <- function(mat) {
-  ans <- t(apply(apply(dat, 2, cumsum), 1, cumsum))
+  ans <- t(apply(dat, 1, cumsum))
   ans
 }
 
@@ -87,7 +87,7 @@ fun2alt(dat)
 # Test for the second
 microbenchmark::microbenchmark(
   fun2(dat),
-  fun2alt(dat)
+  fun2alt(dat), check = "equivalent"
 )
 ```
 

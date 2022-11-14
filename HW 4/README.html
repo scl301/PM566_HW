@@ -382,21 +382,21 @@ dat &lt;- matrix(rnorm(200 * 100), nrow = 200)</code></pre>
 <pre class="r"><code># Test for the first
 microbenchmark::microbenchmark(
   fun1(dat),
-  fun1alt(dat)
+  fun1alt(dat), check = &quot;equivalent&quot;
 )</code></pre>
 <pre><code>## Unit: microseconds
-##          expr   min     lq    mean median    uq    max neval
-##     fun1(dat) 237.6 355.90 453.520 390.95 512.4 1156.1   100
-##  fun1alt(dat)  51.0  52.35  86.448  56.20  70.3 2056.1   100</code></pre>
+##          expr   min    lq    mean median     uq    max neval
+##     fun1(dat) 260.9 369.3 462.728 417.55 508.30 1208.0   100
+##  fun1alt(dat)  51.1  54.1  65.452  61.20  70.85  134.3   100</code></pre>
 <pre class="r"><code># Test for the second
 microbenchmark::microbenchmark(
   fun2(dat),
-  fun2alt(dat)
+  fun2alt(dat), check = &quot;equivalent&quot;
 )</code></pre>
-<pre><code>## Unit: milliseconds
-##          expr    min      lq     mean  median     uq     max neval
-##     fun2(dat) 2.4056 2.77280 4.312014 3.54780 5.3850 11.9565   100
-##  fun2alt(dat) 1.1767 1.28375 2.074937 1.71165 2.7007  6.5345   100</code></pre>
+<pre><code>## Unit: microseconds
+##          expr    min      lq     mean  median      uq     max neval
+##     fun2(dat) 2409.6 2904.75 4118.883 3721.25 4800.55 11499.6   100
+##  fun2alt(dat)  674.6  747.70  966.561  854.10 1073.55  2388.4   100</code></pre>
 </div>
 </div>
 </div>
