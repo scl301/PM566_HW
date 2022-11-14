@@ -377,27 +377,95 @@ pre code {
 <pre class="r"><code># Use the data with this code
 set.seed(2315)
 dat &lt;- matrix(rnorm(200 * 100), nrow = 200)</code></pre>
-<div id="total-row-sums" class="section level3">
-<h3>Total row sums</h3>
+<pre class="r"><code># Total row sums
+fun1 &lt;- function(mat) {
+  n &lt;- nrow(mat)
+  ans &lt;- double(n) 
+  for (i in 1:n) {
+    ans[i] &lt;- sum(mat[i, ])
+  }
+  ans
+}
+
+fun1(dat)</code></pre>
+<pre class="r"><code>fun1alt &lt;- function(mat) {
+  ans &lt;- rowSums(mat)
+  ans
+}
+
+fun1alt(dat)</code></pre>
 <pre class="r"><code># Test for the first
 microbenchmark::microbenchmark(
   fun1(dat),
   fun1alt(dat), check = &quot;equivalent&quot;
 )</code></pre>
 <pre><code>## Unit: microseconds
-##          expr   min    lq    mean median     uq    max neval
-##     fun1(dat) 260.9 369.3 462.728 417.55 508.30 1208.0   100
-##  fun1alt(dat)  51.1  54.1  65.452  61.20  70.85  134.3   100</code></pre>
+##          expr   min    lq    mean median     uq   max neval
+##     fun1(dat) 261.9 387.9 448.497 414.90 466.50 772.7   100
+##  fun1alt(dat)  51.9  57.8  67.480  60.35  71.85 120.0   100</code></pre>
+<pre class="r"><code># Cumulative sum by row
+fun2 &lt;- function(mat) {
+  n &lt;- nrow(mat)
+  k &lt;- ncol(mat)
+  ans &lt;- mat
+  for (i in 1:n) {
+    for (j in 2:k) {
+      ans[i,j] &lt;- mat[i, j] + ans[i, j - 1]
+    }
+  }
+  ans
+}
+
+fun2(dat)</code></pre>
+<pre class="r"><code>fun2alt &lt;- function(mat) {
+  ans &lt;- t(apply(dat, 1, cumsum))
+  ans
+}
+
+fun2alt(dat)</code></pre>
 <pre class="r"><code># Test for the second
 microbenchmark::microbenchmark(
   fun2(dat),
   fun2alt(dat), check = &quot;equivalent&quot;
 )</code></pre>
 <pre><code>## Unit: microseconds
-##          expr    min      lq     mean  median      uq     max neval
-##     fun2(dat) 2409.6 2904.75 4118.883 3721.25 4800.55 11499.6   100
-##  fun2alt(dat)  674.6  747.70  966.561  854.10 1073.55  2388.4   100</code></pre>
+##          expr    min     lq     mean  median      uq    max neval
+##     fun2(dat) 2419.4 2610.4 3498.166 3291.25 4091.55 7991.7   100
+##  fun2alt(dat)  662.4  725.4  853.365  790.50  938.55 1460.1   100</code></pre>
 </div>
+<div id="problem-2-parallel-computing" class="section level2">
+<h2>Problem 2: parallel computing</h2>
+<pre class="r"><code>sim_pi &lt;- function(n = 1000, i = NULL) {
+  p &lt;- matrix(runif(n*2), ncol = 2)
+  mean(rowSums(p^2) &lt; 1) * 4
+}
+
+# Here is an example of the run
+set.seed(156)
+sim_pi(1000) # 3.132</code></pre>
+<pre><code>## [1] 3.132</code></pre>
+<pre class="r"><code># This runs the simulation a 4,000 times, each with 10,000 points
+set.seed(1231)
+system.time({
+  ans &lt;- unlist(lapply(1:4000, sim_pi, n = 10000))
+  print(mean(ans))
+})</code></pre>
+<pre><code>## [1] 3.14124</code></pre>
+<pre><code>##    user  system elapsed 
+##    3.43    0.00    3.69</code></pre>
+<pre class="r"><code>system.time({
+  cl &lt;- makePSOCKcluster(4)
+  clusterSetRNGStream(cl, 1231)
+  ans &lt;- unlist(parLapply(cl, 1:4000, sim_pi, n = 10000))
+  print(mean(ans))
+  stopCluster(cl)
+})</code></pre>
+<pre><code>## [1] 3.141578</code></pre>
+<pre><code>##    user  system elapsed 
+##    0.00    0.05    2.72</code></pre>
+</div>
+<div id="problem-3" class="section level2">
+<h2>Problem 3</h2>
 </div>
 </div>
 
