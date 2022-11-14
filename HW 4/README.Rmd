@@ -1,0 +1,94 @@
+---
+title: "Assignment 4: HPC and SQL"
+author: "Stephanie Lee"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(parallel)
+```
+
+# HPC
+
+## Problem 1: Make sure code is nice
+
+```{r data}
+# Use the data with this code
+set.seed(2315)
+dat <- matrix(rnorm(200 * 100), nrow = 200)
+```
+
+### Total row sums
+
+```{r fun1, include=FALSE}
+fun1 <- function(mat) {
+  n <- nrow(mat)
+  ans <- double(n) 
+  for (i in 1:n) {
+    ans[i] <- sum(mat[i, ])
+  }
+  ans
+}
+
+fun1(dat)
+```
+
+
+```{r fun1alt, include=FALSE}
+fun1alt <- function(mat) {
+  ans <- rowSums(mat)
+  ans
+}
+
+fun1alt(dat)
+```
+
+```{r fun1 test}
+# Test for the first
+microbenchmark::microbenchmark(
+  fun1(dat),
+  fun1alt(dat)
+)
+```
+
+```{r fun2, include=FALSE}
+# Cumulative sum by row
+fun2 <- function(mat) {
+  n <- nrow(mat)
+  k <- ncol(mat)
+  ans <- mat
+  for (i in 1:n) {
+    for (j in 2:k) {
+      ans[i,j] <- mat[i, j] + ans[i, j - 1]
+    }
+  }
+  ans
+}
+
+fun2(dat)
+```
+
+
+```{r fun2alt, include=FALSE}
+
+
+fun2alt <- function(mat) {
+  ans <- t(apply(apply(dat, 2, cumsum), 1, cumsum))
+  ans
+}
+
+fun2alt(dat)
+```
+
+
+```{r}
+# Test for the second
+microbenchmark::microbenchmark(
+  fun2(dat),
+  fun2alt(dat)
+)
+```
+
+
