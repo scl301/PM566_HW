@@ -124,4 +124,66 @@ system.time({
 
 ```
 
-## Problem 3
+# SQL
+
+```{r sql setup}
+# install.packages(c("RSQLite", "DBI"))
+
+library(RSQLite)
+library(DBI)
+
+# Initialize a temporary in memory database
+con <- dbConnect(SQLite(), ":memory:")
+
+# Download tables
+film <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/film.csv")
+film_category <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/film_category.csv")
+category <- read.csv("https://raw.githubusercontent.com/ivanceras/sakila/master/csv-sakila-db/category.csv")
+
+# Copy data.frames to database
+dbWriteTable(con, "film", film)
+dbWriteTable(con, "film_category", film_category)
+dbWriteTable(con, "category", category)
+```
+
+## Question 1
+How many movies are there available in each rating catagory.
+```{sql connection=con}
+SELECT rating, COUNT(*) AS count
+FROM film
+GROUP BY rating
+```
+
+## Question 2
+What is the average replacement cost and rental rate for each rating category.
+```{sql connection=con}
+SELECT c.category_id, AVG(f.replacement_cost) AS avg_replacement_cost, f.rental_rate 
+FROM film AS f 
+  INNER JOIN film_category AS c
+    ON f.film_id = c.film_id
+GROUP BY c.category_id
+```
+
+## Question 3
+Use table film_category together with film to find the how many films there are within each category ID
+```{sql connection=con}
+SELECT c.category_id, COUNT(*) AS count
+FROM film_category AS c 
+  LEFT JOIN film AS f
+    ON f.film_id = c.film_id
+GROUP BY c.category_id
+```
+
+## Question 4
+Incorporate table category into the answer to the previous question to find the name of the most popular category.
+```{sql connection=con}
+SELECT c.name, fc.category_id, COUNT(*) AS count
+FROM film_category AS fc
+  LEFT JOIN film AS f 
+    ON f.film_id = fc.film_id
+      JOIN category AS c
+        ON fc.category_id = c.category_id
+GROUP BY c.category_id
+ORDER BY count DESC
+```
+The most popular category is Sports with the highest number of films.
