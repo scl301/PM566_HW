@@ -1,12 +1,66 @@
 ---
-title: "Assignment 1"
+title: "Assignment 1: Exploratory Data Analysis"
 author: "Stephanie Lee"
 date: "`r Sys.Date()`"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(leaflet)
+library(webshot)
 ```
 
-# Read in data
+# Step 1
+Given the formulated question from the assignment description, you will now conduct EDA Checklist items 2-4. First, download 2004 and 2019 data for all sites in California from the EPA Air Quality Data website. Read in the data using data.table(). For each of the two datasets, check the dimensions, headers, footers, variable names and variable types. Check for any data issues, particularly in the key variable we are analyzing. Make sure you write up a summary of all of your findings.
+
+```{r data}
+data04 <- data.table::fread("ad_viz_plotval_data.csv")
+data19 <- data.table::fread("ad_viz_plotval_data (1).csv")
+```
+
+```{r}
+summary(data04)
+```
+```{r}
+summary(data19)
+```
+```{r}
+head(data04)
+```
+```{r}
+tail(data04)
+```
+```{r}
+head(data19)
+```
+
+```{r}
+tail(data19)
+```
+The 2019 data set has nearly 3 times the number of observations than the 2004 set. All 20 variables in the data are consistent between both sets. There are no missing values. PM 2.5 measurements range from -0.10 to 251in the 2004 set, and -2.2 to 120 in the 2019 set, and have means of 13.3 and 7.7 respectively. The data is organized by site name and then chronologically. Both data sets start with observations in Livermore and end with observations on Woodland-Gibson Road.
+
+Both data sets contain negative values of PM2.5, which are impossible and need to be remedied.
+
+
+# Step 2
+Combine the two years of data into one data frame. Use the Date variable to create a new column for year, which will serve as an identifier. Change the names of the key variables so that they are easier to refer to in your code.
+
+```{r}
+
+```
+
+
+# Step 3
+Create a basic map in leaflet() that shows the locations of the sites (make sure to use different colors for each year). Summarize the spatial distribution of the monitoring sites.
+
+# Step 4
+Check for any missing or implausible values of PM in the combined dataset. Explore the proportions of each and provide a summary of any temporal patterns you see in these observations.
+
+# Step 5
+Explore the main question of interest at three different spatial levels. Create exploratory plots (e.g. boxplots, histograms, line plots) and summary statistics that best suit each level of data. Be sure to write up explanations of what you observe in these data.
+
+state
+county
+site in Los Angeles
