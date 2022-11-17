@@ -8,6 +8,7 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(dplyr)
 library(leaflet)
 library(webshot)
 ```
@@ -16,8 +17,8 @@ library(webshot)
 Given the formulated question from the assignment description, you will now conduct EDA Checklist items 2-4. First, download 2004 and 2019 data for all sites in California from the EPA Air Quality Data website. Read in the data using data.table(). For each of the two datasets, check the dimensions, headers, footers, variable names and variable types. Check for any data issues, particularly in the key variable we are analyzing. Make sure you write up a summary of all of your findings.
 
 ```{r data}
-data04 <- data.table::fread("ad_viz_plotval_data.csv")
-data19 <- data.table::fread("ad_viz_plotval_data (1).csv")
+data04 <- data.table::fread("ad_viz_plotval_data_2004.csv")
+data19 <- data.table::fread("ad_viz_plotval_data_2019.csv")
 ```
 
 ```{r}
@@ -48,12 +49,26 @@ Both data sets contain negative values of PM2.5, which are impossible and need t
 Combine the two years of data into one data frame. Use the Date variable to create a new column for year, which will serve as an identifier. Change the names of the key variables so that they are easier to refer to in your code.
 
 ```{r}
-
+combined <- rbind(data04, data19)
+combined$Date <- as.Date(combined$Date, format="%m/%d/%Y")
+combined$Year <- as.integer(format(combined$Date,'%Y'))
+combined
 ```
-
+```{r}
+combined <- combined %>% 
+  relocate(Year, .before=Date) %>% 
+  rename(
+    PM2.5 = `Daily Mean PM2.5 Concentration`,
+    Lat = SITE_LATITUDE,
+    Long = SITE_LONGITUDE)
+combined
+```
 
 # Step 3
 Create a basic map in leaflet() that shows the locations of the sites (make sure to use different colors for each year). Summarize the spatial distribution of the monitoring sites.
+
+
+
 
 # Step 4
 Check for any missing or implausible values of PM in the combined dataset. Explore the proportions of each and provide a summary of any temporal patterns you see in these observations.

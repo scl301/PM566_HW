@@ -14,8 +14,8 @@ for any data issues, particularly in the key variable we are analyzing.
 Make sure you write up a summary of all of your findings.
 
 ``` r
-data04 <- data.table::fread("ad_viz_plotval_data.csv")
-data19 <- data.table::fread("ad_viz_plotval_data (1).csv")
+data04 <- data.table::fread("ad_viz_plotval_data_2004.csv")
+data19 <- data.table::fread("ad_viz_plotval_data_2019.csv")
 ```
 
 ``` r
@@ -301,6 +301,145 @@ Combine the two years of data into one data frame. Use the Date variable
 to create a new column for year, which will serve as an identifier.
 Change the names of the key variables so that they are easier to refer
 to in your code.
+
+``` r
+combined <- rbind(data04, data19)
+combined$Date <- as.Date(combined$Date, format="%m/%d/%Y")
+combined$Year <- as.integer(format(combined$Date,'%Y'))
+combined
+```
+
+    ##              Date Source  Site ID POC Daily Mean PM2.5 Concentration    UNITS
+    ##     1: 2004-01-01    AQS 60010007   1                            8.9 ug/m3 LC
+    ##     2: 2004-01-02    AQS 60010007   1                           12.2 ug/m3 LC
+    ##     3: 2004-01-03    AQS 60010007   1                           16.5 ug/m3 LC
+    ##     4: 2004-01-04    AQS 60010007   1                           19.5 ug/m3 LC
+    ##     5: 2004-01-05    AQS 60010007   1                           11.5 ug/m3 LC
+    ##    ---                                                                       
+    ## 72385: 2019-11-17    AQS 61131003   1                           18.1 ug/m3 LC
+    ## 72386: 2019-11-29    AQS 61131003   1                           12.5 ug/m3 LC
+    ## 72387: 2019-12-17    AQS 61131003   1                           23.8 ug/m3 LC
+    ## 72388: 2019-12-23    AQS 61131003   1                            1.0 ug/m3 LC
+    ## 72389: 2019-12-29    AQS 61131003   1                            9.1 ug/m3 LC
+    ##        DAILY_AQI_VALUE            Site Name DAILY_OBS_COUNT PERCENT_COMPLETE
+    ##     1:              37            Livermore               1              100
+    ##     2:              51            Livermore               1              100
+    ##     3:              60            Livermore               1              100
+    ##     4:              67            Livermore               1              100
+    ##     5:              48            Livermore               1              100
+    ##    ---                                                                      
+    ## 72385:              64 Woodland-Gibson Road               1              100
+    ## 72386:              52 Woodland-Gibson Road               1              100
+    ## 72387:              76 Woodland-Gibson Road               1              100
+    ## 72388:               4 Woodland-Gibson Road               1              100
+    ## 72389:              38 Woodland-Gibson Road               1              100
+    ##        AQS_PARAMETER_CODE                     AQS_PARAMETER_DESC CBSA_CODE
+    ##     1:              88101               PM2.5 - Local Conditions     41860
+    ##     2:              88502 Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##     3:              88502 Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##     4:              88502 Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##     5:              88502 Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##    ---                                                                    
+    ## 72385:              88101               PM2.5 - Local Conditions     40900
+    ## 72386:              88101               PM2.5 - Local Conditions     40900
+    ## 72387:              88101               PM2.5 - Local Conditions     40900
+    ## 72388:              88101               PM2.5 - Local Conditions     40900
+    ## 72389:              88101               PM2.5 - Local Conditions     40900
+    ##                                      CBSA_NAME STATE_CODE      STATE
+    ##     1:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     2:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     3:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     4:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     5:       San Francisco-Oakland-Hayward, CA          6 California
+    ##    ---                                                              
+    ## 72385: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72386: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72387: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72388: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72389: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ##        COUNTY_CODE  COUNTY SITE_LATITUDE SITE_LONGITUDE Year
+    ##     1:           1 Alameda      37.68753      -121.7842 2004
+    ##     2:           1 Alameda      37.68753      -121.7842 2004
+    ##     3:           1 Alameda      37.68753      -121.7842 2004
+    ##     4:           1 Alameda      37.68753      -121.7842 2004
+    ##     5:           1 Alameda      37.68753      -121.7842 2004
+    ##    ---                                                      
+    ## 72385:         113    Yolo      38.66121      -121.7327 2019
+    ## 72386:         113    Yolo      38.66121      -121.7327 2019
+    ## 72387:         113    Yolo      38.66121      -121.7327 2019
+    ## 72388:         113    Yolo      38.66121      -121.7327 2019
+    ## 72389:         113    Yolo      38.66121      -121.7327 2019
+
+``` r
+combined <- combined %>% 
+  relocate(Year, .before=Date) %>% 
+  rename(
+    PM2.5 = `Daily Mean PM2.5 Concentration`,
+    Lat = SITE_LATITUDE,
+    Long = SITE_LONGITUDE)
+combined
+```
+
+    ##        Year       Date Source  Site ID POC PM2.5    UNITS DAILY_AQI_VALUE
+    ##     1: 2004 2004-01-01    AQS 60010007   1   8.9 ug/m3 LC              37
+    ##     2: 2004 2004-01-02    AQS 60010007   1  12.2 ug/m3 LC              51
+    ##     3: 2004 2004-01-03    AQS 60010007   1  16.5 ug/m3 LC              60
+    ##     4: 2004 2004-01-04    AQS 60010007   1  19.5 ug/m3 LC              67
+    ##     5: 2004 2004-01-05    AQS 60010007   1  11.5 ug/m3 LC              48
+    ##    ---                                                                   
+    ## 72385: 2019 2019-11-17    AQS 61131003   1  18.1 ug/m3 LC              64
+    ## 72386: 2019 2019-11-29    AQS 61131003   1  12.5 ug/m3 LC              52
+    ## 72387: 2019 2019-12-17    AQS 61131003   1  23.8 ug/m3 LC              76
+    ## 72388: 2019 2019-12-23    AQS 61131003   1   1.0 ug/m3 LC               4
+    ## 72389: 2019 2019-12-29    AQS 61131003   1   9.1 ug/m3 LC              38
+    ##                   Site Name DAILY_OBS_COUNT PERCENT_COMPLETE AQS_PARAMETER_CODE
+    ##     1:            Livermore               1              100              88101
+    ##     2:            Livermore               1              100              88502
+    ##     3:            Livermore               1              100              88502
+    ##     4:            Livermore               1              100              88502
+    ##     5:            Livermore               1              100              88502
+    ##    ---                                                                         
+    ## 72385: Woodland-Gibson Road               1              100              88101
+    ## 72386: Woodland-Gibson Road               1              100              88101
+    ## 72387: Woodland-Gibson Road               1              100              88101
+    ## 72388: Woodland-Gibson Road               1              100              88101
+    ## 72389: Woodland-Gibson Road               1              100              88101
+    ##                            AQS_PARAMETER_DESC CBSA_CODE
+    ##     1:               PM2.5 - Local Conditions     41860
+    ##     2: Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##     3: Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##     4: Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##     5: Acceptable PM2.5 AQI & Speciation Mass     41860
+    ##    ---                                                 
+    ## 72385:               PM2.5 - Local Conditions     40900
+    ## 72386:               PM2.5 - Local Conditions     40900
+    ## 72387:               PM2.5 - Local Conditions     40900
+    ## 72388:               PM2.5 - Local Conditions     40900
+    ## 72389:               PM2.5 - Local Conditions     40900
+    ##                                      CBSA_NAME STATE_CODE      STATE
+    ##     1:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     2:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     3:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     4:       San Francisco-Oakland-Hayward, CA          6 California
+    ##     5:       San Francisco-Oakland-Hayward, CA          6 California
+    ##    ---                                                              
+    ## 72385: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72386: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72387: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72388: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ## 72389: Sacramento--Roseville--Arden-Arcade, CA          6 California
+    ##        COUNTY_CODE  COUNTY      Lat      Long
+    ##     1:           1 Alameda 37.68753 -121.7842
+    ##     2:           1 Alameda 37.68753 -121.7842
+    ##     3:           1 Alameda 37.68753 -121.7842
+    ##     4:           1 Alameda 37.68753 -121.7842
+    ##     5:           1 Alameda 37.68753 -121.7842
+    ##    ---                                       
+    ## 72385:         113    Yolo 38.66121 -121.7327
+    ## 72386:         113    Yolo 38.66121 -121.7327
+    ## 72387:         113    Yolo 38.66121 -121.7327
+    ## 72388:         113    Yolo 38.66121 -121.7327
+    ## 72389:         113    Yolo 38.66121 -121.7327
 
 # Step 3
 
