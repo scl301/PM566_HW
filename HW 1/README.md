@@ -1,7 +1,7 @@
 Assignment 1: Exploratory Data Analysis
 ================
 Stephanie Lee
-2022-11-16
+2022-11-28
 
 # Step 1
 
@@ -447,11 +447,86 @@ Create a basic map in leaflet() that shows the locations of the sites
 (make sure to use different colors for each year). Summarize the spatial
 distribution of the monitoring sites.
 
+``` r
+pal <- colorFactor(c('steelblue','tomato'), domain=combined$Year)
+yrs <- unique(combined$Year)
+```
+
+``` r
+sites <- unique(combined[ , c('Year', 'Site ID', 'Site Name', 'Lat', 'Long')])
+sites
+```
+
+    ##      Year  Site ID                    Site Name      Lat      Long
+    ##   1: 2004 60010007                    Livermore 37.68753 -121.7842
+    ##   2: 2004 60011001         Fremont - Chapel Way 37.53583 -121.9618
+    ##   3: 2004 60070002         Chico-Manzanita Ave. 39.75737 -121.8433
+    ##   4: 2004 60074001    TRAFFIC, RURAL PAVED ROAD 39.32756 -121.6688
+    ##   5: 2004 60090001 San Andreas-Gold Strike Road 38.20185 -120.6803
+    ##  ---                                                              
+    ## 262: 2019 61111004         Ojai - East Ojai Ave 34.44806 -119.2313
+    ## 263: 2019 61112002   Simi Valley-Cochran Street 34.27632 -118.6837
+    ## 264: 2019 61113001    El Rio-Rio Mesa School #2 34.25239 -119.1432
+    ## 265: 2019 61130004             Davis-UCD Campus 38.53445 -121.7734
+    ## 266: 2019 61131003         Woodland-Gibson Road 38.66121 -121.7327
+
+``` r
+site_map <- leaflet(sites) %>% 
+  # The looks of the Map
+  addProviderTiles('CartoDB.Positron') %>% 
+  # Some circles
+  addCircles(
+    lat = ~Lat, lng = ~Long,
+    color = ~pal(yrs),
+    opacity = .7, fillOpacity = 1, radius = 500
+    ) %>%
+  addLegend('bottomleft', pal = pal, values = yrs,
+          title='Site Locations', opacity=1)
+site_map
+```
+
+![](README_files/figure-gfm/site%20map-1.png)<!-- --> There are sites
+located all throughout California, with concentrations in cities along
+the coast in major cities, such as San Francisco, San Jose, Los Angeles,
+and San Diego.
+
 # Step 4
 
 Check for any missing or implausible values of PM in the combined
 dataset. Explore the proportions of each and provide a summary of any
 temporal patterns you see in these observations.
+
+``` r
+summary(combined$PM2.5)
+```
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   -2.20    4.40    7.20    9.17   11.30  251.00
+
+``` r
+ggplot(combined, aes(x=PM2.5)) +
+         geom_histogram(binwidth=1)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+nrow(combined[PM2.5 < 0])
+```
+
+    ## [1] 283
+
+``` r
+nrow(combined[is.na(PM2.5)])
+```
+
+    ## [1] 0
+
+238 of the total 72389 observations had an implausible negative PM 2.5
+value, comprising 0.4% of total measurements. PM 2.5 measurements skewed
+left with the median at 7.20 with a max value of 251 (this max
+measurement is valid, as California fires can cause this spike in air
+quality).
 
 # Step 5
 

@@ -67,11 +67,52 @@ combined
 # Step 3
 Create a basic map in leaflet() that shows the locations of the sites (make sure to use different colors for each year). Summarize the spatial distribution of the monitoring sites.
 
+```{r color palette}
+pal <- colorFactor(c('steelblue','tomato'), domain=combined$Year)
+yrs <- unique(combined$Year)
+```
 
+```{r sites}
+sites <- unique(combined[ , c('Year', 'Site ID', 'Site Name', 'Lat', 'Long')])
+sites
+```
+
+```{r site map}
+site_map <- leaflet(sites) %>% 
+  # The looks of the Map
+  addProviderTiles('CartoDB.Positron') %>% 
+  # Some circles
+  addCircles(
+    lat = ~Lat, lng = ~Long,
+    color = ~pal(yrs),
+    opacity = .7, fillOpacity = 1, radius = 500
+    ) %>%
+  addLegend('bottomleft', pal = pal, values = yrs,
+          title='Site Locations', opacity=1)
+site_map
+```
+There are sites located all throughout California, with concentrations in cities along the coast in major cities, such as San Francisco, San Jose, Los Angeles, and San Diego.
 
 
 # Step 4
 Check for any missing or implausible values of PM in the combined dataset. Explore the proportions of each and provide a summary of any temporal patterns you see in these observations.
+```{r}
+summary(combined$PM2.5)
+```
+
+```{r}
+ggplot(combined, aes(x=PM2.5)) +
+         geom_histogram(binwidth=1)
+
+```
+```{r}
+nrow(combined[PM2.5 < 0])
+```
+```{r}
+nrow(combined[is.na(PM2.5)])
+```
+238 of the total 72389 observations had an implausible negative PM 2.5 value, comprising 0.4% of total measurements. PM 2.5 measurements skewed left with the median at 7.20 with a max value of 251 (this max measurement is valid, as California fires can cause this spike in air quality).
+
 
 # Step 5
 Explore the main question of interest at three different spatial levels. Create exploratory plots (e.g. boxplots, histograms, line plots) and summary statistics that best suit each level of data. Be sure to write up explanations of what you observe in these data.
