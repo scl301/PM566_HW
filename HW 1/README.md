@@ -1,7 +1,13 @@
 Assignment 1: Exploratory Data Analysis
 ================
 Stephanie Lee
-2022-11-28
+2022-11-30
+
+# Main Question
+
+Have daily concentrations of PM (particulate matter air pollution with
+aerodynamic diameter less than 2.5 m) decreased in California over the
+last 15 years (from 2004 to 2019)?
 
 # Step 1
 
@@ -305,7 +311,9 @@ to in your code.
 ``` r
 combined <- rbind(data04, data19)
 combined$Date <- as.Date(combined$Date, format="%m/%d/%Y")
-combined$Year <- as.integer(format(combined$Date,'%Y'))
+combined$Year <- as.factor(format(combined$Date,'%Y'))
+combined$COUNTY <- as.factor(combined$COUNTY)
+combined$`Site Name` <- as.factor(combined$`Site Name`)
 combined
 ```
 
@@ -504,13 +512,6 @@ summary(combined$PM2.5)
     ##   -2.20    4.40    7.20    9.17   11.30  251.00
 
 ``` r
-ggplot(combined, aes(x=PM2.5)) +
-         geom_histogram(binwidth=1)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
-
-``` r
 nrow(combined[PM2.5 < 0])
 ```
 
@@ -522,11 +523,31 @@ nrow(combined[is.na(PM2.5)])
 
     ## [1] 0
 
-238 of the total 72389 observations had an implausible negative PM 2.5
-value, comprising 0.4% of total measurements. PM 2.5 measurements skewed
-left with the median at 7.20 with a max value of 251 (this max
-measurement is valid, as California fires can cause this spike in air
-quality).
+``` r
+combined <- combined[PM2.5 > 0]
+```
+
+``` r
+combined$yday <- yday(combined$Date)
+
+yday <- combined %>%
+  group_by(yday, Year) %>%
+  summarize(PM2.5_avg = mean(PM2.5))
+```
+
+    ## `summarise()` has grouped output by 'yday'. You can override using the `.groups` argument.
+
+``` r
+ggplot(yday, aes(x=PM2.5_avg, fill=Year)) +
+  geom_histogram(binwidth = 0.5, position='dodge') +
+  theme(legend.position='right')
+```
+
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- --> 238 of the
+total 72389 observations had an implausible negative PM 2.5 value,
+comprising 0.4% of total measurements. PM 2.5 measurements skewed left
+with the median at 7.20 with a max value of 251 (this max measurement is
+valid, as California fires can cause this spike in air quality).
 
 # Step 5
 
@@ -535,4 +556,111 @@ Create exploratory plots (e.g. boxplots, histograms, line plots) and
 summary statistics that best suit each level of data. Be sure to write
 up explanations of what you observe in these data.
 
-state county site in Los Angeles
+## State
+
+``` r
+state_level <- combined %>%
+  group_by(yday,Year) %>%
+  summarize(PM2.5_avg = mean(PM2.5))
+```
+
+    ## `summarise()` has grouped output by 'yday'. You can override using the `.groups` argument.
+
+``` r
+state_plot <- ggplot(state_level, aes(x=yday, y=PM2.5_avg, color = Year)) +
+  geom_line(aes(fill=Year)) +
+  labs(title="Temporal Patterns of Average PM 2.5 For All Sites",
+        x ="Day of the Year", y = "PM2.5 (ug/m3)",
+        color = "Year")
+```
+
+    ## Warning: Ignoring unknown aesthetics: fill
+
+``` r
+state_plot
+```
+
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- --> Compared to
+2019, the PM 2.5 levels of 2004 visually shows to be overall higher
+throughout the year. Especially towards the beginning and ending months.
+
+## County
+
+``` r
+county_level <- combined %>%
+  group_by(COUNTY, Year) %>%
+  summarize(PM2.5_avg = mean(PM2.5))
+```
+
+    ## `summarise()` has grouped output by 'COUNTY'. You can override using the `.groups` argument.
+
+``` r
+county_level
+```
+
+    ## # A tibble: 98 x 3
+    ## # Groups:   COUNTY [51]
+    ##    COUNTY       Year  PM2.5_avg
+    ##    <fct>        <fct>     <dbl>
+    ##  1 Alameda      2004      11.1 
+    ##  2 Alameda      2019       7.34
+    ##  3 Butte        2004      10.1 
+    ##  4 Butte        2019       7.01
+    ##  5 Calaveras    2004       7.61
+    ##  6 Calaveras    2019       5.46
+    ##  7 Colusa       2004      10.0 
+    ##  8 Colusa       2019       6.63
+    ##  9 Contra Costa 2004      12.8 
+    ## 10 Contra Costa 2019       7.20
+    ## # ... with 88 more rows
+
+``` r
+county_bar <- ggplot(county_level, aes(x=PM2.5_avg, y=COUNTY, fill=Year)) +
+  geom_bar(stat = 'identity', alpha=0.5) +
+  theme(legend.position="right")
+
+county_bar
+```
+
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- --> The same
+pattern is shown between PM 2.5 averages by county, where 2004 PM 2.5
+levels are much higher than in 2019.
+
+## Site in Los Angeles
+
+``` r
+sites_la <- combined[COUNTY=="Los Angeles"] %>%
+  group_by(`Site Name`,Year)
+
+sites_la
+```
+
+    ## # A tibble: 7,155 x 22
+    ## # Groups:   Site Name, Year [24]
+    ##    Year  Date       Source `Site ID`   POC PM2.5 UNITS    DAILY_AQI_VALUE
+    ##    <fct> <date>     <chr>      <int> <int> <dbl> <chr>              <int>
+    ##  1 2004  2004-01-01 AQS     60370002     1  18   ug/m3 LC              63
+    ##  2 2004  2004-01-02 AQS     60370002     1  20.4 ug/m3 LC              68
+    ##  3 2004  2004-01-03 AQS     60370002     1   8   ug/m3 LC              33
+    ##  4 2004  2004-01-07 AQS     60370002     1  23.6 ug/m3 LC              75
+    ##  5 2004  2004-01-08 AQS     60370002     1  28.3 ug/m3 LC              85
+    ##  6 2004  2004-01-09 AQS     60370002     1  21.9 ug/m3 LC              72
+    ##  7 2004  2004-01-10 AQS     60370002     1   9.1 ug/m3 LC              38
+    ##  8 2004  2004-01-11 AQS     60370002     1  12.5 ug/m3 LC              52
+    ##  9 2004  2004-01-12 AQS     60370002     1  42.2 ug/m3 LC             117
+    ## 10 2004  2004-01-13 AQS     60370002     1   9.1 ug/m3 LC              38
+    ## # ... with 7,145 more rows, and 14 more variables: Site Name <fct>,
+    ## #   DAILY_OBS_COUNT <int>, PERCENT_COMPLETE <dbl>, AQS_PARAMETER_CODE <int>,
+    ## #   AQS_PARAMETER_DESC <chr>, CBSA_CODE <int>, CBSA_NAME <chr>,
+    ## #   STATE_CODE <int>, STATE <chr>, COUNTY_CODE <int>, COUNTY <fct>, Lat <dbl>,
+    ## #   Long <dbl>, yday <dbl>
+
+``` r
+sites_violin <- ggplot(sites_la, aes(x=PM2.5, y=`Site Name`, fill=Year, color=Year), fig(5, 30)) +
+  geom_violin(position=position_dodge(1)) +
+  theme(legend.position="right")
+
+sites_violin
+```
+
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
