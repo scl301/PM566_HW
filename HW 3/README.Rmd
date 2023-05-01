@@ -29,7 +29,7 @@ counts <- as.character(counts)
 stringr::str_extract(counts, "[0-9,]+")
 ```
 
-###IDs
+### IDs
 
 ```{r query}
 library(httr)
@@ -86,10 +86,10 @@ database <- data.frame(
   PubMedId = ids,
   Title    = titles,
   Journal  = journal, 
-  Publication_date = date,
+  Date = date,
   Abstract = abstracts 
 )
-knitr::kable(database[1:8,], caption = "Sars-cov-2 trial vaccine Papers")
+knitr::kable(database[1:8,], caption = "Sars-cov-2 Trial Vaccine Publications")
 ```
 ```
 
