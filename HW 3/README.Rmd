@@ -1,0 +1,7 @@
+---
+title: "Assignment 3: Web Scraping and Text Mining"
+author: "Stephanie Lee"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
