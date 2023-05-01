@@ -68,5 +68,29 @@ publications_txt <- as.character(publications)
 publications
 
 ```
+```{r create dataset}
+pub_char_list <- xml2::xml_children(publications)
+pub_char_list <- sapply(pub_char_list, as.character)
+abstracts <- str_extract(pub_char_list, "<Abstract>[[:print:][:space:]]+</Abstract>")
+abstracts <- str_remove_all(abstracts, "</?[[:alnum:]- =\"]+>") 
+abstracts <- str_replace_all(abstracts, "[[:space:]]+"," ")
+titles <- str_extract(pub_char_list, "<ArticleTitle>[[:print:][:space:]]+</ArticleTitle>")
+titles <- str_remove_all(titles, "</?[[:alnum:]- =\"]+>")
+journal <- str_extract(pub_char_list, "<Title>[[:print:][:space:]]+</Title>")
+journal <- str_remove_all(journal, "</?[[:alnum:]- =\"]+>")
+journal <- str_replace_all(journal, "[[:space:]]+"," ")
+date <- str_extract(pub_char_list, "<PubDate>[[:print:][:space:]]+</PubDate>")
+date <- str_remove_all(date, "</?[[:alnum:]- =\"]+>")
+date <- str_replace_all(date, "[[:space:]]+"," ")
+database <- data.frame(
+  PubMedId = ids,
+  Title    = titles,
+  Journal  = journal, 
+  Publication_date = date,
+  Abstract = abstracts 
+)
+knitr::kable(database[1:8,], caption = "Sars-cov-2 trial vaccine Papers")
+```
+```
 
 
