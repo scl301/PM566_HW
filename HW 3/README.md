@@ -108,7 +108,10 @@ pubmed <- read.csv("pubmed.csv")
 pubmed <- as_tibble(pubmed)
 ```
 
-### 1. Tokenize the abstracts and count the number of each token. Do you see anything interesting? Does removing stop words change what tokens appear as the most frequent? What are the 5 most common tokens for each search term after removing stopwords?
+**1. Tokenize the abstracts and count the number of each token. Do you
+see anything interesting? Does removing stop words change what tokens
+appear as the most frequent? What are the 5 most common tokens for each
+search term after removing stopwords?**
 
 ``` r
 pubmed %>%
@@ -160,7 +163,8 @@ After the stop words are removed, there is definitely a change in the
 most frequent tokens. The top 5 tokens are now “covid”, “19”,
 “patients”, “cancer”, and “prostate”.
 
-### 2. Tokenize the abstracts into bigrams. Find the 10 most common bigram and visualize them with ggplot2.
+**2. Tokenize the abstracts into bigrams. Find the 10 most common bigram
+and visualize them with ggplot2.**
 
 ``` r
 pubmed %>%
@@ -175,6 +179,56 @@ pubmed %>%
   labs(y = "bigram", title = "Top 10 Most Frequent Bigrams (Without Stop Words)") 
 ```
 
-![](README_files/figure-gfm/top%2010%20bigrams-1.png)<!-- -->
+![](README_files/figure-gfm/top%2010%20bigrams-1.png)<!-- --> **3.
+Calculate the TF-IDF value for each word-search term combination. (here
+you want the search term to be the “document”) What are the 5 tokens
+from each search term with the highest TF-IDF value? How are the results
+different from the answers you got in question 1?**
 
-### 3. Calculate the TF-IDF value for each word-search term combination. (here you want the search term to be the “document”) What are the 5 tokens from each search term with the highest TF-IDF value? How are the results different from the answers you got in question 1?
+``` r
+term_table <-pubmed %>%
+  group_by(term) %>% 
+  unnest_tokens(word, abstract) %>%
+  count(word, sort = TRUE) %>%
+    bind_tf_idf(word, term, n)
+
+term_table %>%
+    top_n(5,tf_idf) %>% 
+    arrange(desc(term)) %>%
+knitr::kable(digits =4, align=c("l", "c", "c", "c","c","c"), caption = "Top 5 TF-IDFs by Search Term")
+```
+
+| term            |      word       |  n   |   tf   |  idf   | tf_idf |
+|:----------------|:---------------:|:----:|:------:|:------:|:------:|
+| prostate cancer |    prostate     | 3832 | 0.0312 | 1.6094 | 0.0502 |
+| prostate cancer |    androgen     | 305  | 0.0025 | 1.6094 | 0.0040 |
+| prostate cancer |       psa       | 282  | 0.0023 | 1.6094 | 0.0037 |
+| prostate cancer |  prostatectomy  | 215  | 0.0017 | 1.6094 | 0.0028 |
+| prostate cancer |   castration    | 148  | 0.0012 | 1.6094 | 0.0019 |
+| preeclampsia    |    eclampsia    | 2005 | 0.0143 | 1.6094 | 0.0230 |
+| preeclampsia    |  preeclampsia   | 1863 | 0.0133 | 1.6094 | 0.0214 |
+| preeclampsia    |    pregnancy    | 969  | 0.0069 | 0.5108 | 0.0035 |
+| preeclampsia    |    maternal     | 797  | 0.0057 | 0.5108 | 0.0029 |
+| preeclampsia    |   gestational   | 191  | 0.0014 | 1.6094 | 0.0022 |
+| meningitis      |   meningitis    | 429  | 0.0092 | 1.6094 | 0.0148 |
+| meningitis      |    meningeal    | 219  | 0.0047 | 1.6094 | 0.0076 |
+| meningitis      |       csf       | 206  | 0.0044 | 0.9163 | 0.0040 |
+| meningitis      | pachymeningitis | 149  | 0.0032 | 1.6094 | 0.0051 |
+| meningitis      |    meninges     | 106  | 0.0023 | 1.6094 | 0.0037 |
+| cystic fibrosis |    fibrosis     | 867  | 0.0176 | 0.5108 | 0.0090 |
+| cystic fibrosis |     cystic      | 862  | 0.0175 | 0.5108 | 0.0090 |
+| cystic fibrosis |       cf        | 625  | 0.0127 | 0.9163 | 0.0117 |
+| cystic fibrosis |      cftr       |  86  | 0.0018 | 1.6094 | 0.0028 |
+| cystic fibrosis |      sweat      |  83  | 0.0017 | 1.6094 | 0.0027 |
+| covid           |      covid      | 7275 | 0.0371 | 1.6094 | 0.0597 |
+| covid           |    pandemic     | 800  | 0.0041 | 1.6094 | 0.0066 |
+| covid           |   coronavirus   | 647  | 0.0033 | 1.6094 | 0.0053 |
+| covid           |      sars       | 372  | 0.0019 | 1.6094 | 0.0031 |
+| covid           |       cov       | 334  | 0.0017 | 1.6094 | 0.0027 |
+
+Top 5 TF-IDFs by Search Term
+
+Factoring the TF-IDF values provides greater information on the
+relevancy of a term. These terms differ from those in question 1, as
+they are more specific to terminology and conditions rather than simply
+the frequency of all words independently.
