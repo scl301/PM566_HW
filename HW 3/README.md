@@ -179,11 +179,12 @@ pubmed %>%
   labs(y = "bigram", title = "Top 10 Most Frequent Bigrams (Without Stop Words)") 
 ```
 
-![](README_files/figure-gfm/top%2010%20bigrams-1.png)<!-- --> **3.
-Calculate the TF-IDF value for each word-search term combination. (here
-you want the search term to be the “document”) What are the 5 tokens
-from each search term with the highest TF-IDF value? How are the results
-different from the answers you got in question 1?**
+![](README_files/figure-gfm/top%2010%20bigrams-1.png)<!-- -->
+
+**3. Calculate the TF-IDF value for each word-search term combination.
+(here you want the search term to be the “document”) What are the 5
+tokens from each search term with the highest TF-IDF value? How are the
+results different from the answers you got in question 1?**
 
 ``` r
 term_table <-pubmed %>%

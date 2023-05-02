@@ -153,6 +153,7 @@ pubmed %>%
   geom_col()+
   labs(y = "bigram", title = "Top 10 Most Frequent Bigrams (Without Stop Words)") 
 ```
+
 **3. Calculate the TF-IDF value for each word-search term combination. (here you want the search term to be the “document”) What are the 5 tokens from each search term with the highest TF-IDF value? How are the results different from the answers you got in question 1?**
 
 ```{r tf-idf}
